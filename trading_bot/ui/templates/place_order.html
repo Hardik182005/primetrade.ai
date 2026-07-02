@@ -191,22 +191,22 @@
       Testnet Active
     </div>
     <nav class="sidebar-nav">
-      <a href="/trade" class="sidebar-item active">
+      <a href="#" class="sidebar-item active" data-view="place" onclick="switchView(event,'place')">
         <span class="sidebar-item-icon">📊</span> Place Order
       </a>
-      <a href="#" class="sidebar-item" onclick="loadOpenOrders(event)">
+      <a href="#" class="sidebar-item" data-view="orders" onclick="switchView(event,'orders')">
         <span class="sidebar-item-icon">📋</span> Open Orders
       </a>
-      <a href="#" class="sidebar-item" onclick="loadAccount(event)">
+      <a href="#" class="sidebar-item" data-view="account" onclick="switchView(event,'account')">
         <span class="sidebar-item-icon">💰</span> Account
       </a>
       <a href="/" class="sidebar-item">
         <span class="sidebar-item-icon">🏠</span> Home
       </a>
-      <a href="#" class="sidebar-item" onclick="sidebarAction(event,'settings')">
+      <a href="#" class="sidebar-item" data-view="settings" onclick="switchView(event,'settings')">
         <span class="sidebar-item-icon">⚙️</span> Settings
       </a>
-      <a href="#" class="sidebar-item" onclick="sidebarAction(event,'help')">
+      <a href="#" class="sidebar-item" data-view="help" onclick="switchView(event,'help')">
         <span class="sidebar-item-icon">❓</span> Help
       </a>
     </nav>
@@ -222,7 +222,7 @@
   <!-- Main -->
   <main class="main">
     <div class="page-top">
-      <div class="breadcrumb">Dashboard &rsaquo; <span>Place Order</span></div>
+      <div class="breadcrumb">Dashboard &rsaquo; <span id="breadcrumb-label">Place Order</span></div>
       <div class="search-wrap">
         <span style="color:var(--gray-400)">🔍</span>
         <input type="text" placeholder="Search symbols… e.g. BTCUSDT" id="search-bar" oninput="quickSearch(this.value)" />
@@ -230,63 +230,118 @@
     </div>
 
     <div class="page-body">
-      <div class="page-header">
-        <h1>Place Order</h1>
-        <p>Trade crypto futures on Binance Testnet (USDT-M) — zero real funds at risk.</p>
-      </div>
 
-      <div class="order-card">
-
-        <!-- Symbol + live price -->
-        <div class="symbol-row">
-          <div class="symbol-wrap">
-            <label class="form-label">Symbol</label>
-            <input class="form-input" type="text" id="symbol" placeholder="e.g. BTCUSDT"
-              value="BTCUSDT" oninput="onSymbolChange()" style="text-transform:uppercase" />
-          </div>
-          <div class="live-price-box">
-            <div class="live-price-label"><span class="live-price-dot"></span>Mark Price</div>
-            <div class="live-price-value" id="livePrice">—</div>
-          </div>
+      <!-- ===== Place Order view ===== -->
+      <section id="view-place">
+        <div class="page-header">
+          <h1>Place Order</h1>
+          <p>Trade crypto futures on Binance Testnet (USDT-M) — zero real funds at risk.</p>
         </div>
 
-        <!-- Order type tabs -->
-        <div class="order-tabs">
-          <button class="tab-btn active" onclick="setType('MARKET',this)">MARKET</button>
-          <button class="tab-btn"        onclick="setType('LIMIT',this)">LIMIT</button>
-          <button class="tab-btn"        onclick="setType('STOP',this)">STOP-LIMIT</button>
-        </div>
+        <div class="order-card">
 
-        <!-- Side toggle -->
-        <div class="side-toggle">
-          <button class="side-btn buy active" id="btn-buy" onclick="setSide('BUY')">▲ BUY</button>
-          <button class="side-btn sell"       id="btn-sell" onclick="setSide('SELL')">▼ SELL</button>
-        </div>
-
-        <!-- Fields -->
-        <div class="fields-grid">
-          <div>
-            <label class="form-label">Quantity</label>
-            <input class="form-input" type="number" id="quantity" placeholder="0.001" step="0.001" min="0.001" />
+          <!-- Symbol + live price -->
+          <div class="symbol-row">
+            <div class="symbol-wrap">
+              <label class="form-label">Symbol</label>
+              <input class="form-input" type="text" id="symbol" placeholder="e.g. BTCUSDT"
+                value="BTCUSDT" oninput="onSymbolChange()" style="text-transform:uppercase" />
+            </div>
+            <div class="live-price-box">
+              <div class="live-price-label"><span class="live-price-dot"></span>Mark Price</div>
+              <div class="live-price-value" id="livePrice">—</div>
+            </div>
           </div>
-          <div id="field-price" style="display:none">
-            <label class="form-label">Price (USDT)</label>
-            <input class="form-input" type="number" id="price" placeholder="0.00" step="0.01" min="0" />
+
+          <!-- Order type tabs -->
+          <div class="order-tabs">
+            <button class="tab-btn active" onclick="setType('MARKET',this)">MARKET</button>
+            <button class="tab-btn"        onclick="setType('LIMIT',this)">LIMIT</button>
+            <button class="tab-btn"        onclick="setType('STOP',this)">STOP-LIMIT</button>
           </div>
-          <div id="field-stop" style="display:none" class="field-full">
-            <label class="form-label">Stop Price (USDT)</label>
-            <input class="form-input" type="number" id="stopPrice" placeholder="0.00" step="0.01" min="0" />
+
+          <!-- Side toggle -->
+          <div class="side-toggle">
+            <button class="side-btn buy active" id="btn-buy" onclick="setSide('BUY')">▲ BUY</button>
+            <button class="side-btn sell"       id="btn-sell" onclick="setSide('SELL')">▼ SELL</button>
           </div>
+
+          <!-- Fields -->
+          <div class="fields-grid">
+            <div>
+              <label class="form-label">Quantity</label>
+              <input class="form-input" type="number" id="quantity" placeholder="0.001" step="0.001" min="0.001" />
+            </div>
+            <div id="field-price" style="display:none">
+              <label class="form-label">Price (USDT)</label>
+              <input class="form-input" type="number" id="price" placeholder="0.00" step="0.01" min="0" />
+            </div>
+            <div id="field-stop" style="display:none" class="field-full">
+              <label class="form-label">Stop Price (USDT)</label>
+              <input class="form-input" type="number" id="stopPrice" placeholder="0.00" step="0.01" min="0" />
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button class="submit-btn buy" id="submitBtn" onclick="placeOrder()">
+            Place BUY MARKET Order
+          </button>
+
+          <!-- Result -->
+          <div class="result-panel" id="resultPanel"></div>
+        </div><!-- /order-card -->
+      </section>
+
+      <!-- ===== Open Orders view ===== -->
+      <section id="view-orders" style="display:none">
+        <div class="page-header">
+          <h1>Open Orders</h1>
+          <p>Live open orders on Binance Futures Testnet.</p>
         </div>
+        <div class="order-card">
+          <div id="ordersContent"></div>
+        </div>
+      </section>
 
-        <!-- Submit -->
-        <button class="submit-btn buy" id="submitBtn" onclick="placeOrder()">
-          Place BUY MARKET Order
-        </button>
+      <!-- ===== Account view ===== -->
+      <section id="view-account" style="display:none">
+        <div class="page-header">
+          <h1>Account</h1>
+          <p>Wallet balances on Binance Futures Testnet.</p>
+        </div>
+        <div class="order-card">
+          <div id="accountContent"></div>
+        </div>
+      </section>
 
-        <!-- Result -->
-        <div class="result-panel" id="resultPanel"></div>
-      </div><!-- /order-card -->
+      <!-- ===== Settings view ===== -->
+      <section id="view-settings" style="display:none">
+        <div class="page-header">
+          <h1>Settings</h1>
+          <p>Bot configuration (read-only).</p>
+        </div>
+        <div class="order-card">
+          <div class="result-row"><span class="result-key">API Base URL</span><span class="result-val">https://testnet.binancefuture.com</span></div>
+          <div class="result-row"><span class="result-key">Log File</span><span class="result-val">logs/trading_bot.log</span></div>
+          <div class="result-row"><span class="result-key">Default Qty</span><span class="result-val">0.001</span></div>
+          <div class="result-row"><span class="result-key">Time In Force</span><span class="result-val">GTC</span></div>
+        </div>
+      </section>
+
+      <!-- ===== Help view ===== -->
+      <section id="view-help" style="display:none">
+        <div class="page-header">
+          <h1>Help</h1>
+          <p>Order types &amp; CLI quick reference.</p>
+        </div>
+        <div class="order-card">
+          <div class="result-row"><span class="result-key">MARKET</span><span class="result-val">Fills immediately at current price</span></div>
+          <div class="result-row"><span class="result-key">LIMIT</span><span class="result-val">Fills when price reaches your target</span></div>
+          <div class="result-row"><span class="result-key">STOP_MARKET</span><span class="result-val">Market order triggered at stop price</span></div>
+          <div class="result-row"><span class="result-key">TWAP</span><span class="result-val">CLI only: splits order into timed slices</span></div>
+          <div class="result-row"><span class="result-key">CLI command</span><span class="result-val">python cli.py place --interactive</span></div>
+        </div>
+      </section>
 
     </div><!-- /page-body -->
   </main>
@@ -414,76 +469,85 @@
     panel.style.display = 'block';
   }
 
-  // ------ Sidebar ------
-  function setActiveSidebar(el) {
-    document.querySelectorAll('.sidebar-item').forEach(a => a.classList.remove('active'));
-    el.classList.add('active');
-    // update breadcrumb
-    const label = el.textContent.trim().replace(/^[^\s]+\s/, '');
-    const bc = document.querySelector('.breadcrumb');
-    if (bc) bc.innerHTML = 'Dashboard &rsaquo; <span>' + label + '</span>';
+  // ------ Sidebar / view switching ------
+  const VIEW_LABELS = { place: 'Place Order', orders: 'Open Orders', account: 'Account', settings: 'Settings', help: 'Help' };
+
+  function switchView(e, view) {
+    e.preventDefault();
+    document.querySelectorAll('.sidebar-item[data-view]').forEach(a => a.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+
+    document.querySelectorAll('.page-body > section').forEach(s => s.style.display = 'none');
+    document.getElementById('view-' + view).style.display = 'block';
+
+    const bc = document.getElementById('breadcrumb-label');
+    if (bc) bc.textContent = VIEW_LABELS[view] || view;
+
+    clearInterval(priceInterval);
+    if (view === 'place') {
+      const sym = document.getElementById('symbol').value.trim().toUpperCase() || 'BTCUSDT';
+      fetchPrice(sym);
+      priceInterval = setInterval(() => fetchPrice(sym), 8000);
+    } else if (view === 'orders') {
+      loadOpenOrders();
+    } else if (view === 'account') {
+      loadAccount();
+    }
+
+    document.querySelector('.page-body').scrollIntoView({behavior:'smooth', block:'start'});
   }
 
-  function loadOpenOrders(e) {
-    e.preventDefault();
-    setActiveSidebar(e.currentTarget);
-    const panel = document.getElementById('resultPanel');
-    panel.className = 'result-panel success';
-    panel.innerHTML = '<div class="result-title" style="color:#059669">Open Orders</div>' +
-      '<div class="result-row"><span class="result-key">Tip</span>' +
-      '<span class="result-val">Run: python cli.py account</span></div>' +
-      '<div class="result-row"><span class="result-key">Note</span>' +
-      '<span class="result-val">Open orders visible in Binance Testnet dashboard</span></div>';
-    panel.style.display = 'block';
-    panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+  function loadOpenOrders() {
+    const el = document.getElementById('ordersContent');
+    el.innerHTML = '<div class="result-row"><span class="result-key">Status</span><span class="result-val">Loading…</span></div>';
+    fetch('/api/orders')
+      .then(r => r.json())
+      .then(d => {
+        if (d.error) {
+          el.innerHTML = '<div class="result-row"><span class="result-key">Error</span><span class="result-val">' + d.error + '</span></div>';
+          return;
+        }
+        const orders = d.orders || [];
+        if (!orders.length) {
+          el.innerHTML = '<div class="result-row"><span class="result-key">Status</span><span class="result-val">No open orders</span></div>';
+          return;
+        }
+        el.innerHTML = orders.map(o => {
+          const px = (o.price && parseFloat(o.price) > 0) ? parseFloat(o.price).toFixed(2) + ' USDT' : 'MARKET';
+          return '<div class="result-row"><span class="result-key">#' + o.orderId + ' — ' + o.symbol + '</span>' +
+            '<span class="result-val">' + o.side + ' ' + o.type + ' · ' + o.origQty + ' @ ' + px + ' · ' + o.status + '</span></div>';
+        }).join('');
+      })
+      .catch(err => {
+        el.innerHTML = '<div class="result-row"><span class="result-key">Error</span><span class="result-val">' + err.toString() + '</span></div>';
+      });
   }
 
-  function loadAccount(e) {
-    e.preventDefault();
-    setActiveSidebar(e.currentTarget);
-    const panel = document.getElementById('resultPanel');
-    panel.className = 'result-panel success';
-    panel.innerHTML = '<div class="result-title" style="color:#7C3AED">Loading account balances...</div>';
-    panel.style.display = 'block';
+  function loadAccount() {
+    const el = document.getElementById('accountContent');
+    el.innerHTML = '<div class="result-row"><span class="result-key">Status</span><span class="result-val">Loading…</span></div>';
     fetch('/api/account')
       .then(r => r.json())
       .then(d => {
-        if (d.error) { showResult('error', 'Account Error', [['Error', d.error]]); return; }
+        if (d.error) {
+          el.innerHTML = '<div class="result-row"><span class="result-key">Error</span><span class="result-val">' + d.error + '</span></div>';
+          return;
+        }
         const assets = d.assets || [];
-        const rows = assets.length
-          ? assets.map(a => [
-              a.asset,
-              parseFloat(a.walletBalance).toFixed(4) + ' USDT  |  PnL: ' +
-              (parseFloat(a.unrealizedProfit) >= 0 ? '+' : '') +
-              parseFloat(a.unrealizedProfit).toFixed(4)
-            ])
-          : [['Balance', 'No assets with balance > 0']];
-        showResult('success', 'Account Balances (Testnet)', rows);
-        panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+        if (!assets.length) {
+          el.innerHTML = '<div class="result-row"><span class="result-key">Balance</span><span class="result-val">No assets with balance &gt; 0</span></div>';
+          return;
+        }
+        el.innerHTML = assets.map(a => {
+          const pnl = parseFloat(a.unrealizedProfit);
+          return '<div class="result-row"><span class="result-key">' + a.asset + '</span>' +
+            '<span class="result-val">' + parseFloat(a.walletBalance).toFixed(4) + ' USDT  |  PnL: ' +
+            (pnl >= 0 ? '+' : '') + pnl.toFixed(4) + '</span></div>';
+        }).join('');
       })
-      .catch(err => showResult('error', 'Network Error', [['Error', err.toString()]]));
-  }
-
-  function sidebarAction(e, type) {
-    e.preventDefault();
-    setActiveSidebar(e.currentTarget);
-    if (type === 'settings') {
-      showResult('success', 'Settings', [
-        ['API Base URL',  'https://testnet.binancefuture.com'],
-        ['Log File',      'logs/trading_bot.log'],
-        ['Default Qty',   '0.001'],
-        ['Time In Force', 'GTC'],
-      ]);
-    } else if (type === 'help') {
-      showResult('success', 'Quick Help', [
-        ['MARKET',      'Fills immediately at current price'],
-        ['LIMIT',       'Fills when price reaches your target'],
-        ['STOP_MARKET', 'Market order triggered at stop price'],
-        ['TWAP',        'CLI only: splits order into timed slices'],
-        ['CLI command',  'python cli.py place --interactive'],
-      ]);
-    }
-    document.getElementById('resultPanel').scrollIntoView({behavior:'smooth', block:'nearest'});
+      .catch(err => {
+        el.innerHTML = '<div class="result-row"><span class="result-key">Error</span><span class="result-val">' + err.toString() + '</span></div>';
+      });
   }
 
   // Boot

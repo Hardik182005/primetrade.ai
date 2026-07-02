@@ -127,6 +127,17 @@ def api_account():
         return jsonify({"error": str(exc)}), 400
 
 
+@app.route("/api/orders")
+def api_orders():
+    symbol = request.args.get("symbol", "").strip()
+    try:
+        client = _client()
+        orders = client.get_open_orders(symbol or None)
+        return jsonify({"orders": orders})
+    except BinanceClientError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+
 @app.route("/api/chat", methods=["POST"])
 def api_chat():
     try:
