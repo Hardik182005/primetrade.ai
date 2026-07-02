@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://primetrade-ai.vercel.app"><strong>🌐 Live Demo →</strong></a>
+  <a href="https://primetrade-ai-bot.vercel.app"><strong>🌐 Live Demo →</strong></a>
 </p>
 
 ---
@@ -239,21 +239,21 @@ def sign(params: dict, secret: str) -> dict:
 
 ## Deployment (Vercel)
 
+Live at **[primetrade-ai-bot.vercel.app](https://primetrade-ai-bot.vercel.app)** — a single serverless function via `@vercel/python`. `vercel.json` routes all traffic through `api/index.py`, which imports the Flask `app`.
+
 ```bash
 cd trading_bot
-vercel --prod
+npx vercel link --yes --project primetrade-ai-bot
+npx vercel env add BINANCE_API_KEY production --sensitive
+npx vercel env add BINANCE_API_SECRET production --sensitive
+npx vercel env add OPENAI_API_KEY production --sensitive
+npx vercel env add ELEVENLABS_API_KEY production --sensitive
+npx vercel --prod
 ```
 
-Set environment secrets in Vercel dashboard or CLI:
+Secrets are stored encrypted in the Vercel project's Production environment — never committed to the repo (`.env` and `.env.local` are excluded via `.gitignore` / `.vercelignore`).
 
-```bash
-vercel env add BINANCE_API_KEY
-vercel env add BINANCE_API_SECRET
-vercel env add OPENAI_API_KEY
-vercel env add ELEVENLABS_API_KEY
-```
-
-`vercel.json` routes all traffic through `api/index.py` which imports the Flask app.
+> **Note:** the serverless filesystem is read-only outside `/tmp`. `logging_config.py` detects the `VERCEL` env var and writes rotating logs to `/tmp/` in that environment instead of `logs/`.
 
 ---
 
@@ -266,6 +266,18 @@ vercel env add ELEVENLABS_API_KEY
 ```
 
 Logs rotate at 5 MB, keeping 3 backups. See `logs/market_order.log` and `logs/limit_order.log` for real testnet output.
+
+---
+
+## Assumptions
+
+- Orders are placed against **Binance Futures Testnet (USDT-M)** only — no real funds are ever at risk, and the code has no mainnet base URL configured.
+- The user has already registered a Binance Futures Testnet account and generated API credentials (`BINANCE_API_KEY` / `BINANCE_API_SECRET`); this bot does not automate account creation.
+- Symbols are validated against a `[A-Z]{2,10}USDT` pattern, i.e. USDT-margined pairs only (BTCUSDT, ETHUSDT, etc.) — other quote assets (BUSD, BTC-margined) are out of scope.
+- LIMIT and STOP orders default to `timeInForce=GTC` (Good-Til-Cancelled) since the assignment didn't specify an order lifetime policy.
+- TWAP is implemented client-side as sequential MARKET slices (not a native Binance order type), since Binance Futures Testnet has no built-in TWAP endpoint.
+- The Flask web UI and AI voice chatbot are bonus additions on top of the core CLI requirement — the CLI (`cli.py`) works standalone with no web server running.
+- On Vercel, the serverless filesystem is read-only outside `/tmp`; log files still get written, just to `/tmp` instead of `logs/` in that environment (see `bot/logging_config.py`).
 
 ---
 
