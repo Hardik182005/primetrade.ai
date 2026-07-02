@@ -1,0 +1,16 @@
+2026-07-02 12:49:35 | INFO     | __main__             | CLI started - pid=39616
+2026-07-02 12:49:35 | INFO     | bot.orders           | === MARKET ORDER ===  BUY BTCUSDT  qty=0.001
+2026-07-02 12:49:35 | INFO     | bot.client           | Placing MARKET BUY order: symbol=BTCUSDT  qty=0.001  price=None
+2026-07-02 12:49:35 | INFO     | bot.client           | POST /fapi/v1/order  params={'symbol': 'BTCUSDT', 'side': 'BUY', 'type': 'MARKET', 'quantity': '0.001', 'timestamp': 1782976775507}
+2026-07-02 12:49:36 | INFO     | bot.client           | Order placed: orderId=18429058427  status=NEW
+2026-07-02 12:49:36 | INFO     | bot.orders           | === MARKET ORDER ===  BUY BTCUSDT  qty=0.001
+┌─────────────────────────── Order Response - NEW ────────────────────────────┐
+│   Order ID   : 18429058427                                                  │
+│   Symbol     : BTCUSDT                                                      │
+│   Side       : BUY                                                          │
+│   Type       : MARKET                                                       │
+│   Status     : NEW                                                          │
+│   Exec Qty   : 0.0000                                                       │
+│   Avg Price  : 0.00                                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+2026-07-02 12:49:36 | INFO     | __main__             | CLI: order complete - orderId=18429058427

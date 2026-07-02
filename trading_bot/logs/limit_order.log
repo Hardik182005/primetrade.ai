@@ -1,0 +1,15 @@
+2026-07-02 12:49:58 | INFO     | __main__             | CLI started - pid=35736
+2026-07-02 12:49:58 | INFO     | bot.orders           | === LIMIT ORDER ===  SELL ETHUSDT  qty=0.05  price=2600.0
+2026-07-02 12:49:58 | INFO     | bot.client           | Placing LIMIT SELL order: symbol=ETHUSDT  qty=0.05  price=2600.0
+2026-07-02 12:49:58 | INFO     | bot.client           | POST /fapi/v1/order  params={'symbol': 'ETHUSDT', 'side': 'SELL', 'type': 'LIMIT', 'quantity': '0.05', 'price': '2600.0', 'timeInForce': 'GTC', 'timestamp': 1782976798350}
+2026-07-02 12:49:58 | INFO     | bot.client           | Order placed: orderId=11552852930  status=NEW
+┌─────────────────────────── Order Response - NEW ────────────────────────────┐
+│   Order ID   : 11552852930                                                  │
+│   Symbol     : ETHUSDT                                                      │
+│   Side       : SELL                                                         │
+│   Type       : LIMIT                                                        │
+│   Status     : NEW                                                          │
+│   Exec Qty   : 0.000                                                        │
+│   Avg Price  : 2600.00                                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+2026-07-02 12:49:58 | INFO     | __main__             | CLI: order complete - orderId=11552852930
