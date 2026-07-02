@@ -1,0 +1,498 @@
+{% extends "base.html" %}
+{% block title %}Place Order — PrimeTrade Bot{% endblock %}
+{% block nav_trade %}active{% endblock %}
+
+{% block extra_styles %}
+.dashboard {
+  display: flex;
+  min-height: calc(100vh - 100px);
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  background: white;
+  border-right: 1px solid var(--gray-200);
+  padding: 1.2rem 0;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-status {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin: 0 1rem 1.5rem;
+  padding: 0.4rem 0.8rem;
+  background: #F0FDF4; border-radius: 99px;
+  font-size: 0.78rem; font-weight: 600; color: #15803D;
+  width: fit-content;
+}
+.sidebar-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+.sidebar-nav { flex: 1; }
+.sidebar-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.7rem 1.25rem;
+  margin: 0.1rem 0.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.88rem; font-weight: 500;
+  color: var(--gray-600);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.sidebar-item:hover { background: var(--purple-50); color: var(--purple); }
+.sidebar-item.active {
+  background: var(--purple-100); color: var(--purple); font-weight: 600;
+  border-left: 3px solid var(--purple);
+  margin-left: 0.5rem;
+  padding-left: calc(1.25rem - 3px);
+}
+.sidebar-item-icon { font-size: 1rem; width: 20px; text-align: center; }
+.sidebar-footer {
+  border-top: 1px solid var(--gray-200); margin-top: 1rem; padding: 1rem 1.25rem;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--purple); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; font-weight: 700; flex-shrink: 0;
+}
+.user-name  { font-size: 0.85rem; font-weight: 600; }
+.user-role  { font-size: 0.72rem; color: var(--gray-400); }
+
+/* ── Main ── */
+.main { flex: 1; background: var(--gray-50); display: flex; flex-direction: column; }
+.page-top {
+  background: white; border-bottom: 1px solid var(--gray-200);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 2rem;
+}
+.breadcrumb { font-size: 0.82rem; color: var(--gray-400); }
+.breadcrumb span { color: var(--gray-900); font-weight: 600; }
+.search-wrap {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--gray-100); border-radius: 8px;
+  padding: 0.45rem 0.9rem; width: 260px;
+}
+.search-wrap input {
+  border: none; background: none; outline: none;
+  font-size: 0.85rem; color: var(--gray-700); width: 100%;
+}
+.search-wrap input::placeholder { color: var(--gray-400); }
+
+.page-body { padding: 2rem; flex: 1; }
+
+.page-header { margin-bottom: 2rem; }
+.page-header h1 { font-size: 1.5rem; font-weight: 800; }
+.page-header p  { color: var(--gray-600); font-size: 0.88rem; margin-top: 0.3rem; }
+
+/* ── Order Form Card ── */
+.order-card {
+  background: white; border-radius: 16px;
+  border: 1px solid var(--gray-200);
+  padding: 2rem; max-width: 540px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+
+/* Symbol + live price */
+.symbol-row {
+  display: flex; gap: 0.75rem; align-items: flex-end; margin-bottom: 1.5rem;
+}
+.symbol-wrap { flex: 1; }
+.form-label {
+  display: block; font-size: 0.78rem; font-weight: 600;
+  color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+}
+.form-input {
+  width: 100%; padding: 0.6rem 0.85rem;
+  border: 1.5px solid var(--gray-200); border-radius: 9px;
+  font-size: 0.92rem; outline: none; transition: border 0.15s;
+  font-family: var(--font); color: var(--gray-900);
+}
+.form-input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-100); }
+.live-price-box {
+  background: var(--gray-50); border: 1.5px solid var(--gray-200);
+  border-radius: 9px; padding: 0.55rem 0.9rem; min-width: 130px;
+  text-align: right;
+}
+.live-price-label { font-size: 0.7rem; color: var(--gray-400); font-weight: 600; text-transform: uppercase; }
+.live-price-value { font-size: 1.1rem; font-weight: 800; color: var(--gray-900); font-variant-numeric: tabular-nums; }
+.live-price-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 4px; animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* Order type tabs */
+.order-tabs { display: flex; gap: 0.35rem; margin-bottom: 1.25rem; }
+.tab-btn {
+  flex: 1; padding: 0.5rem; border: 1.5px solid var(--gray-200);
+  border-radius: 8px; background: white; cursor: pointer;
+  font-size: 0.8rem; font-weight: 600; color: var(--gray-600);
+  transition: all 0.15s;
+}
+.tab-btn:hover { border-color: var(--purple-light); color: var(--purple); }
+.tab-btn.active {
+  background: var(--purple); color: white; border-color: var(--purple);
+}
+
+/* Side toggle */
+.side-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 1.5rem; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--gray-200); }
+.side-btn {
+  padding: 0.65rem; border: none; cursor: pointer;
+  font-size: 0.9rem; font-weight: 700; transition: all 0.15s;
+  background: var(--gray-50); color: var(--gray-400);
+}
+.side-btn.buy.active  { background: #ECFDF5; color: #059669; }
+.side-btn.sell.active { background: #FEF2F2; color: var(--red); }
+
+/* Fields */
+.fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+.field-full { grid-column: 1 / -1; }
+
+/* Submit button */
+.submit-btn {
+  width: 100%; padding: 0.85rem;
+  border: none; border-radius: 10px;
+  font-size: 0.97rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.submit-btn.buy  { background: var(--green); color: white; }
+.submit-btn.sell { background: var(--red);   color: white; }
+.submit-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* Result panel */
+.result-panel {
+  margin-top: 1.5rem;
+  border-radius: 12px; padding: 1.25rem 1.4rem;
+  border: 1.5px solid; display: none;
+}
+.result-panel.success { border-color: #6EE7B7; background: #F0FDF4; }
+.result-panel.error   { border-color: #FCA5A5; background: #FEF2F2; }
+.result-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.75rem; }
+.result-row { display: flex; justify-content: space-between; font-size: 0.83rem; padding: 0.2rem 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+.result-key { color: var(--gray-600); }
+.result-val { font-weight: 600; }
+.spinner {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white; border-radius: 50%;
+  animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-status">
+      <div class="sidebar-dot"></div>
+      Testnet Active
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/trade" class="sidebar-item active">
+        <span class="sidebar-item-icon">📊</span> Place Order
+      </a>
+      <a href="#" class="sidebar-item" onclick="loadOpenOrders(event)">
+        <span class="sidebar-item-icon">📋</span> Open Orders
+      </a>
+      <a href="#" class="sidebar-item" onclick="loadAccount(event)">
+        <span class="sidebar-item-icon">💰</span> Account
+      </a>
+      <a href="/" class="sidebar-item">
+        <span class="sidebar-item-icon">🏠</span> Home
+      </a>
+      <a href="#" class="sidebar-item" onclick="sidebarAction(event,'settings')">
+        <span class="sidebar-item-icon">⚙️</span> Settings
+      </a>
+      <a href="#" class="sidebar-item" onclick="sidebarAction(event,'help')">
+        <span class="sidebar-item-icon">❓</span> Help
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">H</div>
+      <div>
+        <div class="user-name">Hardik</div>
+        <div class="user-role">Testnet Trader</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="page-top">
+      <div class="breadcrumb">Dashboard &rsaquo; <span>Place Order</span></div>
+      <div class="search-wrap">
+        <span style="color:var(--gray-400)">🔍</span>
+        <input type="text" placeholder="Search symbols… e.g. BTCUSDT" id="search-bar" oninput="quickSearch(this.value)" />
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="page-header">
+        <h1>Place Order</h1>
+        <p>Trade crypto futures on Binance Testnet (USDT-M) — zero real funds at risk.</p>
+      </div>
+
+      <div class="order-card">
+
+        <!-- Symbol + live price -->
+        <div class="symbol-row">
+          <div class="symbol-wrap">
+            <label class="form-label">Symbol</label>
+            <input class="form-input" type="text" id="symbol" placeholder="e.g. BTCUSDT"
+              value="BTCUSDT" oninput="onSymbolChange()" style="text-transform:uppercase" />
+          </div>
+          <div class="live-price-box">
+            <div class="live-price-label"><span class="live-price-dot"></span>Mark Price</div>
+            <div class="live-price-value" id="livePrice">—</div>
+          </div>
+        </div>
+
+        <!-- Order type tabs -->
+        <div class="order-tabs">
+          <button class="tab-btn active" onclick="setType('MARKET',this)">MARKET</button>
+          <button class="tab-btn"        onclick="setType('LIMIT',this)">LIMIT</button>
+          <button class="tab-btn"        onclick="setType('STOP',this)">STOP-LIMIT</button>
+        </div>
+
+        <!-- Side toggle -->
+        <div class="side-toggle">
+          <button class="side-btn buy active" id="btn-buy" onclick="setSide('BUY')">▲ BUY</button>
+          <button class="side-btn sell"       id="btn-sell" onclick="setSide('SELL')">▼ SELL</button>
+        </div>
+
+        <!-- Fields -->
+        <div class="fields-grid">
+          <div>
+            <label class="form-label">Quantity</label>
+            <input class="form-input" type="number" id="quantity" placeholder="0.001" step="0.001" min="0.001" />
+          </div>
+          <div id="field-price" style="display:none">
+            <label class="form-label">Price (USDT)</label>
+            <input class="form-input" type="number" id="price" placeholder="0.00" step="0.01" min="0" />
+          </div>
+          <div id="field-stop" style="display:none" class="field-full">
+            <label class="form-label">Stop Price (USDT)</label>
+            <input class="form-input" type="number" id="stopPrice" placeholder="0.00" step="0.01" min="0" />
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button class="submit-btn buy" id="submitBtn" onclick="placeOrder()">
+          Place BUY MARKET Order
+        </button>
+
+        <!-- Result -->
+        <div class="result-panel" id="resultPanel"></div>
+      </div><!-- /order-card -->
+
+    </div><!-- /page-body -->
+  </main>
+
+</div><!-- /dashboard -->
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let currentSide = 'BUY';
+  let currentType = 'MARKET';
+  let priceInterval = null;
+
+  // ------ Symbol / price ------
+  function onSymbolChange() {
+    clearInterval(priceInterval);
+    const sym = document.getElementById('symbol').value.trim().toUpperCase();
+    if (sym.length >= 5) {
+      fetchPrice(sym);
+      priceInterval = setInterval(() => fetchPrice(sym), 8000);
+    }
+  }
+
+  function fetchPrice(sym) {
+    fetch('/api/price/' + sym)
+      .then(r => r.json())
+      .then(d => {
+        const el = document.getElementById('livePrice');
+        if (d.price) {
+          el.textContent = parseFloat(d.price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        } else {
+          el.textContent = '—';
+        }
+      })
+      .catch(() => { document.getElementById('livePrice').textContent = 'N/A'; });
+  }
+
+  function quickSearch(val) {
+    const sym = val.trim().toUpperCase();
+    document.getElementById('symbol').value = sym;
+    if (sym.length >= 5) onSymbolChange();
+  }
+
+  // ------ Order type ------
+  function setType(type, btn) {
+    currentType = type;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    document.getElementById('field-price').style.display = (type !== 'MARKET') ? 'block' : 'none';
+    document.getElementById('field-stop').style.display  = (type === 'STOP')   ? 'block' : 'none';
+    updateSubmitBtn();
+  }
+
+  // ------ Side ------
+  function setSide(side) {
+    currentSide = side;
+    document.getElementById('btn-buy').classList.toggle('active', side === 'BUY');
+    document.getElementById('btn-sell').classList.toggle('active', side === 'SELL');
+    updateSubmitBtn();
+  }
+
+  function updateSubmitBtn() {
+    const btn = document.getElementById('submitBtn');
+    const label = currentType === 'STOP' ? 'STOP-LIMIT' : currentType;
+    btn.textContent = `Place ${currentSide} ${label} Order`;
+    btn.className = 'submit-btn ' + currentSide.toLowerCase();
+  }
+
+  // ------ Place order ------
+  function placeOrder() {
+    const btn = document.getElementById('submitBtn');
+    const symbol = document.getElementById('symbol').value.trim().toUpperCase();
+    const quantity = document.getElementById('quantity').value;
+    const price    = document.getElementById('price').value;
+    const stopP    = document.getElementById('stopPrice').value;
+    const panel    = document.getElementById('resultPanel');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Placing order…';
+    panel.style.display = 'none';
+
+    const body = { symbol, side: currentSide, type: currentType, quantity: parseFloat(quantity) };
+    if (currentType !== 'MARKET') body.price = parseFloat(price);
+    if (currentType === 'STOP')   body.stopPrice = parseFloat(stopP);
+
+    fetch('/api/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    .then(r => r.json())
+    .then(d => {
+      btn.disabled = false;
+      updateSubmitBtn();
+      if (d.error) {
+        showResult('error', 'Order Failed', [['Error', d.error]]);
+      } else {
+        const o = d.order;
+        const avgP = parseFloat(o.avgPrice || 0);
+        showResult('success', 'Order Placed Successfully', [
+          ['Order ID',   o.orderId],
+          ['Status',     o.status],
+          ['Symbol',     o.symbol],
+          ['Side',       o.side],
+          ['Type',       o.type],
+          ['Quantity',   o.origQty],
+          ['Exec Qty',   o.executedQty],
+          ['Avg Price',  avgP > 0 ? avgP.toFixed(2) + ' USDT' : '(pending)'],
+        ]);
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      updateSubmitBtn();
+      showResult('error', 'Request Failed', [['Error', err.toString()]]);
+    });
+  }
+
+  function showResult(type, title, rows) {
+    const panel = document.getElementById('resultPanel');
+    const color = type === 'success' ? '#059669' : '#DC2626';
+    panel.className = 'result-panel ' + type;
+    panel.innerHTML = `<div class="result-title" style="color:${color}">${title}</div>` +
+      rows.map(([k,v]) => `<div class="result-row"><span class="result-key">${k}</span><span class="result-val">${v}</span></div>`).join('');
+    panel.style.display = 'block';
+  }
+
+  // ------ Sidebar ------
+  function setActiveSidebar(el) {
+    document.querySelectorAll('.sidebar-item').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+    // update breadcrumb
+    const label = el.textContent.trim().replace(/^[^\s]+\s/, '');
+    const bc = document.querySelector('.breadcrumb');
+    if (bc) bc.innerHTML = 'Dashboard &rsaquo; <span>' + label + '</span>';
+  }
+
+  function loadOpenOrders(e) {
+    e.preventDefault();
+    setActiveSidebar(e.currentTarget);
+    const panel = document.getElementById('resultPanel');
+    panel.className = 'result-panel success';
+    panel.innerHTML = '<div class="result-title" style="color:#059669">Open Orders</div>' +
+      '<div class="result-row"><span class="result-key">Tip</span>' +
+      '<span class="result-val">Run: python cli.py account</span></div>' +
+      '<div class="result-row"><span class="result-key">Note</span>' +
+      '<span class="result-val">Open orders visible in Binance Testnet dashboard</span></div>';
+    panel.style.display = 'block';
+    panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function loadAccount(e) {
+    e.preventDefault();
+    setActiveSidebar(e.currentTarget);
+    const panel = document.getElementById('resultPanel');
+    panel.className = 'result-panel success';
+    panel.innerHTML = '<div class="result-title" style="color:#7C3AED">Loading account balances...</div>';
+    panel.style.display = 'block';
+    fetch('/api/account')
+      .then(r => r.json())
+      .then(d => {
+        if (d.error) { showResult('error', 'Account Error', [['Error', d.error]]); return; }
+        const assets = d.assets || [];
+        const rows = assets.length
+          ? assets.map(a => [
+              a.asset,
+              parseFloat(a.walletBalance).toFixed(4) + ' USDT  |  PnL: ' +
+              (parseFloat(a.unrealizedProfit) >= 0 ? '+' : '') +
+              parseFloat(a.unrealizedProfit).toFixed(4)
+            ])
+          : [['Balance', 'No assets with balance > 0']];
+        showResult('success', 'Account Balances (Testnet)', rows);
+        panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+      })
+      .catch(err => showResult('error', 'Network Error', [['Error', err.toString()]]));
+  }
+
+  function sidebarAction(e, type) {
+    e.preventDefault();
+    setActiveSidebar(e.currentTarget);
+    if (type === 'settings') {
+      showResult('success', 'Settings', [
+        ['API Base URL',  'https://testnet.binancefuture.com'],
+        ['Log File',      'logs/trading_bot.log'],
+        ['Default Qty',   '0.001'],
+        ['Time In Force', 'GTC'],
+      ]);
+    } else if (type === 'help') {
+      showResult('success', 'Quick Help', [
+        ['MARKET',      'Fills immediately at current price'],
+        ['LIMIT',       'Fills when price reaches your target'],
+        ['STOP_MARKET', 'Market order triggered at stop price'],
+        ['TWAP',        'CLI only: splits order into timed slices'],
+        ['CLI command',  'python cli.py place --interactive'],
+      ]);
+    }
+    document.getElementById('resultPanel').scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  // Boot
+  window.onload = () => {
+    fetchPrice('BTCUSDT');
+    priceInterval = setInterval(() => {
+      const sym = document.getElementById('symbol').value.trim().toUpperCase();
+      if (sym) fetchPrice(sym);
+    }, 8000);
+  };
+</script>
+{% endblock %}

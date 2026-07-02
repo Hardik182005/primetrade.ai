@@ -1,0 +1,468 @@
+{% extends "base.html" %}
+{% block title %}PrimeTrade Bot — Automated Futures Trading{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block extra_styles %}
+/* ── Hero ── */
+.hero {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6rem 10vw 5rem; gap: 3rem; background: var(--white);
+}
+.hero-left { flex: 1; max-width: 540px; }
+.hero-eyebrow {
+  display: inline-block; background: var(--purple-100); color: var(--purple);
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 0.3rem 0.8rem; border-radius: 99px; margin-bottom: 1.5rem;
+}
+.hero-title { font-size: clamp(2.2rem,4vw,3.4rem); font-weight: 800; line-height: 1.13; letter-spacing: -0.02em; color: var(--gray-900); }
+.hero-title-accent { color: var(--purple); }
+.hero-sub { margin-top: 1.2rem; color: var(--gray-600); font-size: 1.05rem; line-height: 1.65; max-width: 420px; }
+.hero-actions { display: flex; gap: 1rem; margin-top: 2.2rem; align-items: center; }
+.btn-lg { padding: 0.75rem 1.8rem; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; text-decoration: none; border: none; transition: all 0.15s; }
+.btn-purple { background: var(--purple); color: white; }
+.btn-purple:hover { background: var(--purple-med); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(109,40,217,0.35); }
+.btn-outline { background: white; color: var(--gray-800); border: 1.5px solid var(--gray-200); }
+.btn-outline:hover { border-color: var(--purple); color: var(--purple); }
+
+/* Price card */
+.hero-right { flex: 0 0 380px; }
+.price-card { background: white; border-radius: 20px; padding: 1.8rem; box-shadow: 0 8px 40px rgba(0,0,0,0.1); border: 1px solid var(--gray-200); }
+.price-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem; }
+.price-card-name { font-size: 0.9rem; font-weight: 600; color: var(--gray-600); }
+.price-card-price { font-size: 2rem; font-weight: 800; color: var(--gray-900); font-variant-numeric: tabular-nums; }
+.price-card-change { color: var(--green); font-size: 0.88rem; font-weight: 600; }
+.price-card-badge { display: inline-flex; align-items: center; gap: 0.3rem; background: #F0FDF4; color: var(--green); font-size: 0.78rem; font-weight: 600; padding: 0.25rem 0.6rem; border-radius: 99px; margin-top: 1rem; }
+.mini-chart { width: 100%; height: 80px; margin-top: 1rem; border-radius: 8px; overflow: hidden; }
+.mini-chart svg { width: 100%; height: 100%; }
+
+/* ── ANIMATED PIPELINE ── */
+.pipeline-section { background: #F4F0FF; padding: 5rem 6vw; }
+.section-title { text-align: center; font-size: 1.8rem; font-weight: 800; color: var(--gray-900); margin-bottom: 0.5rem; }
+.section-sub { text-align: center; color: var(--gray-600); font-size: 1rem; margin-bottom: 3.5rem; }
+
+.pipeline-wrap {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; position: relative; padding: 2rem 0;
+}
+
+/* individual node */
+.p-node { display: flex; flex-direction: column; align-items: center; gap: 0.65rem; position: relative; z-index: 2; min-width: 90px; }
+.p-icon {
+  width: 58px; height: 58px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; border: 2px solid var(--gray-200);
+  background: white; transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+.p-icon.lit {
+  border-color: var(--purple); background: var(--purple); color: white;
+  box-shadow: 0 0 0 8px rgba(109,40,217,0.12), 0 6px 24px rgba(109,40,217,0.45);
+  transform: scale(1.12);
+}
+.p-icon.lit-green {
+  border-color: #10B981; background: #10B981; color: white;
+  box-shadow: 0 0 0 8px rgba(16,185,129,0.12), 0 6px 24px rgba(16,185,129,0.45);
+  transform: scale(1.12);
+}
+.p-label { font-size: 0.82rem; font-weight: 700; color: var(--gray-800); text-align: center; }
+.p-sub   { font-size: 0.7rem; color: var(--gray-400); text-align: center; line-height: 1.4; }
+
+/* LIVE badge */
+.live-badge {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  background: #7C3AED; color: white; font-size: 0.62rem; font-weight: 700;
+  padding: 0.15rem 0.5rem; border-radius: 99px; letter-spacing: 0.06em;
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+@keyframes badge-pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+/* connector line */
+.p-conn {
+  flex: 1; position: relative;
+  top: -40px; /* align to icon centers */
+  height: 2px; min-width: 40px;
+}
+.p-conn-track {
+  width: 100%; height: 2px;
+  background: repeating-linear-gradient(90deg,#C4B5FD 0,#C4B5FD 7px,transparent 7px,transparent 16px);
+  position: relative;
+}
+.p-conn-dot {
+  width: 11px; height: 11px; background: var(--purple);
+  border-radius: 50%; position: absolute; top: -4.5px; left: -11px; opacity: 0;
+  box-shadow: 0 0 8px rgba(109,40,217,0.6);
+}
+.p-conn-dot.travel { animation: dot-go 0.9s cubic-bezier(0.4,0,0.2,1) forwards; }
+@keyframes dot-go {
+  0%   { left: 0;                  opacity: 1; }
+  100% { left: calc(100% - 11px);  opacity: 1; }
+}
+.p-conn-label {
+  position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+  font-size: 0.66rem; color: var(--purple-light); font-weight: 600;
+  white-space: nowrap;
+}
+
+/* center elevated card */
+.p-center {
+  position: relative; z-index: 5;
+  background: white; border-radius: 20px;
+  padding: 1.5rem 1.7rem; min-width: 168px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+  border: 2px solid var(--gray-200);
+  transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  top: -16px;
+}
+.p-center.lit {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 6px rgba(109,40,217,0.1), 0 16px 48px rgba(109,40,217,0.25);
+  transform: scale(1.06) translateY(-4px);
+}
+.p-center-icon { font-size: 1.8rem; text-align: center; margin-bottom: 0.4rem; color: var(--purple); }
+.p-center-title { font-size: 0.96rem; font-weight: 800; color: var(--gray-900); text-align: center; margin-bottom: 0.6rem; }
+.p-center-row { display: flex; justify-content: space-between; font-size: 0.75rem; padding: 0.2rem 0; border-bottom: 1px solid var(--gray-100); }
+.p-center-key { color: var(--gray-500); }
+.p-center-val { font-weight: 700; color: var(--purple); font-variant-numeric: tabular-nums; }
+.p-center-status {
+  margin-top: 0.6rem; text-align: center;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em;
+  padding: 0.25rem 0.7rem; border-radius: 99px;
+  background: var(--gray-100); color: var(--gray-500);
+  transition: all 0.4s;
+}
+.p-center-status.active { background: #ECFDF5; color: #059669; }
+
+/* ── Feature cards ── */
+.features-section { padding: 5rem 10vw; background: white; }
+.features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 3rem; }
+.feature-card { border: 1.5px solid var(--gray-200); border-radius: 16px; padding: 1.8rem; transition: all 0.2s; }
+.feature-card:hover { border-color: var(--purple-light); box-shadow: 0 4px 24px rgba(109,40,217,0.1); transform: translateY(-2px); }
+.feature-icon { width: 44px; height: 44px; background: var(--purple-50); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 1rem; }
+.feature-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+.feature-desc  { font-size: 0.86rem; color: var(--gray-600); line-height: 1.6; }
+
+/* ── CTA ── */
+.cta-banner { margin: 0 10vw 5rem; background: var(--purple); border-radius: 20px; padding: 3rem 3.5rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+.cta-title { color: white; font-size: 1.6rem; font-weight: 800; }
+.cta-sub   { color: rgba(255,255,255,0.75); font-size: 0.9rem; margin-top: 0.3rem; }
+.btn-white { background: white; color: var(--purple); font-weight: 700; font-size: 0.95rem; padding: 0.75rem 2rem; border-radius: 10px; text-decoration: none; white-space: nowrap; transition: all 0.15s; }
+.btn-white:hover { background: var(--purple-50); }
+
+/* ── Footer ── */
+footer { background: var(--gray-900); color: white; padding: 3rem 10vw; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 3rem; }
+.footer-brand { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem; font-weight: 700; font-size: 1rem; }
+.footer-desc { color: var(--gray-400); font-size: 0.85rem; line-height: 1.7; max-width: 280px; }
+.footer-tagline { color: var(--gray-400); font-size: 0.8rem; font-style: italic; margin-top: 0.6rem; }
+.footer-col h4 { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 1rem; }
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 0.6rem; }
+.footer-col a  { color: var(--gray-400); text-decoration: none; font-size: 0.88rem; transition: color 0.15s; }
+.footer-col a:hover { color: white; }
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-left">
+    <span class="hero-eyebrow">⚡ Binance Futures Testnet</span>
+    <h1 class="hero-title">
+      The market moves.<br>
+      <span class="hero-title-accent">We execute.</span>
+    </h1>
+    <p class="hero-sub">
+      Automated crypto futures trading bot. Place Market, Limit, Stop-Market,
+      and TWAP orders on Binance Testnet — with a clean CLI and a live web dashboard.
+    </p>
+    <div class="hero-actions">
+      <a href="/trade" class="btn-lg btn-purple">Start Trading</a>
+      <a href="#how-it-works" class="btn-lg btn-outline">How it works</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="price-card">
+      <div class="price-card-header">
+        <div>
+          <div class="price-card-name">BTCUSDT · Futures</div>
+          <div style="font-size:0.75rem;color:var(--gray-400)">Binance Testnet (USDT-M)</div>
+        </div>
+        <span class="price-card-badge">● TESTNET LIVE</span>
+      </div>
+      <div class="price-card-price" id="hero-price">—</div>
+      <div class="price-card-change" id="hero-change">Loading...</div>
+      <div class="mini-chart">
+        <svg viewBox="0 0 340 80" preserveAspectRatio="none">
+          <polyline points="0,65 40,58 80,62 120,48 160,40 200,32 240,38 280,20 320,14 340,10"
+            fill="none" stroke="#7C3AED" stroke-width="2.5" stroke-linejoin="round"/>
+          <polyline points="0,65 40,58 80,62 120,48 160,40 200,32 240,38 280,20 320,14 340,10 340,80 0,80"
+            fill="url(#grad)" stroke="none"/>
+          <defs>
+            <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Animated Pipeline ── -->
+<section class="pipeline-section" id="how-it-works">
+  <h2 class="section-title">How the bot executes an order</h2>
+  <p class="section-sub">Every order flows through 5 stages — watch it happen live.</p>
+
+  <div class="pipeline-wrap">
+
+    <!-- Node 1: Your Input -->
+    <div class="p-node">
+      <div class="p-icon" id="pn1">🖥️</div>
+      <div class="p-label">Your Input</div>
+      <div class="p-sub">CLI or Web UI</div>
+    </div>
+
+    <!-- Line 1 -->
+    <div class="p-conn">
+      <div class="p-conn-track">
+        <div class="p-conn-dot" id="pd1"></div>
+      </div>
+      <span class="p-conn-label">validate</span>
+    </div>
+
+    <!-- Node 2: Validators -->
+    <div class="p-node">
+      <div class="p-icon" id="pn2">🛡️</div>
+      <div class="p-label">Validators</div>
+      <div class="p-sub">symbol · qty · price</div>
+    </div>
+
+    <!-- Line 2 -->
+    <div class="p-conn">
+      <div class="p-conn-track">
+        <div class="p-conn-dot" id="pd2"></div>
+      </div>
+      <span class="p-conn-label">sign HMAC</span>
+    </div>
+
+    <!-- Center Card -->
+    <div class="p-center" id="pn-center">
+      <div class="p-center-icon">🔐</div>
+      <div class="p-center-title">Bot Engine</div>
+      <div class="p-center-row">
+        <span class="p-center-key">Symbol</span>
+        <span class="p-center-val">BTCUSDT</span>
+      </div>
+      <div class="p-center-row">
+        <span class="p-center-key">BTC Price</span>
+        <span class="p-center-val" id="pipe-price">—</span>
+      </div>
+      <div class="p-center-row">
+        <span class="p-center-key">Qty</span>
+        <span class="p-center-val">0.001</span>
+      </div>
+      <div class="p-center-status" id="pipe-status">PENDING</div>
+    </div>
+
+    <!-- Line 3 -->
+    <div class="p-conn">
+      <div class="p-conn-track">
+        <div class="p-conn-dot" id="pd3"></div>
+      </div>
+      <span class="p-conn-label">REST API</span>
+    </div>
+
+    <!-- Node 4: Binance API -->
+    <div class="p-node" style="position:relative">
+      <div style="position:relative">
+        <span class="live-badge">LIVE</span>
+        <div class="p-icon" id="pn4">⚡</div>
+      </div>
+      <div class="p-label">Binance API</div>
+      <div class="p-sub">testnet.binancefuture.com</div>
+    </div>
+
+    <!-- Line 4 -->
+    <div class="p-conn">
+      <div class="p-conn-track">
+        <div class="p-conn-dot" id="pd4"></div>
+      </div>
+      <span class="p-conn-label">orderId</span>
+    </div>
+
+    <!-- Node 5: Order Placed -->
+    <div class="p-node">
+      <div class="p-icon" id="pn5">✓</div>
+      <div class="p-label">Order Placed</div>
+      <div class="p-sub">status · fill · avg price</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features-section">
+  <h2 class="section-title">Everything you need</h2>
+  <p class="section-sub">Built for correctness, clarity, and extensibility.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📈</div>
+      <div class="feature-title">4 Order Types</div>
+      <div class="feature-desc">Market, Limit, Stop-Market, and TWAP orders — all on Binance Futures Testnet USDT-M contracts.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <div class="feature-title">Input Validation</div>
+      <div class="feature-desc">Every parameter is validated before the API call. Clear error messages tell you exactly what's wrong.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <div class="feature-title">Structured Logging</div>
+      <div class="feature-desc">Rotating log files capture every request, response, and error — useful for debugging without noise.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💻</div>
+      <div class="feature-title">Rich CLI</div>
+      <div class="feature-desc">Interactive menus with coloured prompts, or direct flags for scripting. Powered by Typer + Rich.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌐</div>
+      <div class="feature-title">Web Dashboard</div>
+      <div class="feature-desc">Live price display, tabbed order form, and instant response panel — all in your browser.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⏱️</div>
+      <div class="feature-title">TWAP Execution</div>
+      <div class="feature-desc">Split large orders into timed slices to minimise market impact. Configure slice count and interval.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-banner">
+  <div>
+    <div class="cta-title">Ready to trade?</div>
+    <div class="cta-sub">Add your Binance Testnet API keys and place your first order in seconds.</div>
+  </div>
+  <a href="/trade" class="btn-white">Open Dashboard →</a>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div>
+    <div class="footer-brand">
+      <div class="nav-logo-icon" style="width:28px;height:28px;font-size:0.9rem;">⚡</div>
+      PrimeTrade.ai Bot
+    </div>
+    <div class="footer-desc">
+      A Python trading bot for Binance Futures Testnet (USDT-M). Built for traders who want institutional-grade automation.
+    </div>
+    <div class="footer-tagline">The market moves. We execute.</div>
+  </div>
+  <div class="footer-col">
+    <h4>Product</h4>
+    <ul>
+      <li><a href="/trade">Place Order</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <h4>Order Types</h4>
+    <ul>
+      <li><a href="#">Market</a></li>
+      <li><a href="#">Limit</a></li>
+      <li><a href="#">Stop-Market</a></li>
+      <li><a href="#">TWAP</a></li>
+    </ul>
+  </div>
+</footer>
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* ── Live hero price ── */
+let lastPrice = null;
+function loadHeroPrice() {
+  fetch('/api/price/BTCUSDT')
+    .then(r => r.json())
+    .then(d => {
+      if (!d.price) return;
+      const p = parseFloat(d.price);
+      document.getElementById('hero-price').textContent =
+        p.toLocaleString('en-US', {minimumFractionDigits: 2});
+      if (lastPrice !== null) {
+        const chg = ((p - lastPrice) / lastPrice * 100).toFixed(2);
+        const el = document.getElementById('hero-change');
+        el.textContent = (chg >= 0 ? '+' : '') + chg + '% today';
+        el.style.color = chg >= 0 ? 'var(--green)' : 'var(--red)';
+      }
+      lastPrice = p;
+      document.getElementById('pipe-price').textContent =
+        p.toLocaleString('en-US', {minimumFractionDigits: 2});
+    })
+    .catch(() => {});
+}
+loadHeroPrice();
+setInterval(loadHeroPrice, 10000);
+
+/* ── Animated pipeline ── */
+const NODES  = ['pn1','pn2','pn-center','pn4','pn5'];
+const DOTS   = ['pd1','pd2','pd3','pd4'];
+const CYCLE  = 9000; // ms for one full pass
+
+const nodeClass = (id) => id === 'pn5' ? 'lit-green' : (id === 'pn-center' ? '' : 'lit');
+
+function resetPipeline() {
+  NODES.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('lit','lit-green'); }
+  });
+  const center = document.getElementById('pn-center');
+  if (center) center.classList.remove('lit');
+  const st = document.getElementById('pipe-status');
+  if (st) { st.classList.remove('active'); st.textContent = 'PENDING'; }
+  DOTS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('travel');
+  });
+}
+
+function lightNode(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (id === 'pn-center') el.classList.add('lit');
+  else el.classList.add(id === 'pn5' ? 'lit-green' : 'lit');
+}
+
+function flowDot(dotId) {
+  const el = document.getElementById(dotId);
+  if (!el) return;
+  el.classList.remove('travel');
+  void el.offsetWidth; // force reflow
+  el.classList.add('travel');
+}
+
+function runPipeline() {
+  resetPipeline();
+  const steps = [
+    { fn: () => lightNode('pn1'),        t: 0    },
+    { fn: () => flowDot('pd1'),          t: 700  },
+    { fn: () => lightNode('pn2'),        t: 1600 },
+    { fn: () => flowDot('pd2'),          t: 2300 },
+    { fn: () => lightNode('pn-center'),  t: 3200 },
+    { fn: () => flowDot('pd3'),          t: 4200 },
+    { fn: () => lightNode('pn4'),        t: 5100 },
+    { fn: () => flowDot('pd4'),          t: 5800 },
+    { fn: () => {
+        lightNode('pn5');
+        const st = document.getElementById('pipe-status');
+        if (st) { st.textContent = 'FILLED'; st.classList.add('active'); }
+      }, t: 6700 },
+  ];
+  steps.forEach(s => setTimeout(s.fn, s.t));
+}
+
+runPipeline();
+setInterval(runPipeline, CYCLE);
+</script>
+{% endblock %}
