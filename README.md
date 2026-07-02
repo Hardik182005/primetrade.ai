@@ -34,13 +34,17 @@ The full project lives in [`trading_bot/`](trading_bot/) — see [`trading_bot/R
 
 ## Screenshots
 
-| Landing Page | Trade Dashboard |
+| Landing Page | Order Execution Pipeline |
 |---|---|
-| ![Landing page](trading_bot/docs/screenshots/landing.png) | ![Trade dashboard](trading_bot/docs/screenshots/dashboard.png) |
+| ![Landing page](trading_bot/docs/screenshots/landing.png) | ![Order pipeline](trading_bot/docs/screenshots/pipeline.png) |
 
-| AI Voice Chatbot | Account & Balances |
+| Trade Dashboard — Place Order | Open Orders (live testnet) |
 |---|---|
-| ![Chatbot](trading_bot/docs/screenshots/chatbot.png) | ![Account panel](trading_bot/docs/screenshots/account.png) |
+| ![Trade dashboard](trading_bot/docs/screenshots/dashboard.png) | ![Open orders](trading_bot/docs/screenshots/orders.png) |
+
+| Account & Balances | AI Voice Chatbot (TradeBot) |
+|---|---|
+| ![Account panel](trading_bot/docs/screenshots/account.png) | ![Chatbot](trading_bot/docs/screenshots/chatbot.png) |
 
 ---
 

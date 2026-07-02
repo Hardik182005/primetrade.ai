@@ -201,6 +201,22 @@ POST /api/voice              — Text-to-speech (ElevenLabs)
 
 ---
 
+## Screenshots
+
+| Landing Page | Order Execution Pipeline |
+|---|---|
+| ![Landing page](docs/screenshots/landing.png) | ![Order pipeline](docs/screenshots/pipeline.png) |
+
+| Place Order | Open Orders (live testnet) |
+|---|---|
+| ![Place order](docs/screenshots/dashboard.png) | ![Open orders](docs/screenshots/orders.png) |
+
+| Account & Balances | AI Voice Chatbot (TradeBot) |
+|---|---|
+| ![Account panel](docs/screenshots/account.png) | ![Chatbot](docs/screenshots/chatbot.png) |
+
+---
+
 ## AI Voice Chatbot (TradeBot)
 
 Every page has a floating **🤖** button. Click it to open TradeBot.
